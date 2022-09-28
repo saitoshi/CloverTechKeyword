@@ -185,17 +185,13 @@ myForm.addEventListener("submit", function (e) {
     kuromoji.builder({ dicPath: "./dict" }).build((err, tokenizer) => {
       if (err) {
         console.log(err);
-      } else {
-        const tokens = tokenizer.tokenize(keyText);
-        console.log(tokens);
-        tokens.forEach((token) => {
-          if (token.pos == "名詞" && token.word_id != 80) {
-            nounList.push(token);
-          }
-        });
       }
+      const tokens = tokenizer.tokenize(keyText); // 解析データの取得
+      tokens.forEach((token) => {
+        // 解析結果を順番に取得する
+        console.log(token);
+      });
     });
-    console.log(nounList);
   };
 
   reader.readAsText(input);
