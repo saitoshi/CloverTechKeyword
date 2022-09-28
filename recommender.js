@@ -56,23 +56,48 @@ function getFifteen(arr) {
 }
 
 // arr to CSV
-function saveCSV(array) {
-  var csv = "";
-  // (B) ARRAY TO CSV STRING
-  for (let i = 0; i < array.length + 1; i++) {
-    for (let j = 0; j < array[i].length; j++) {
-      csv += array[i][j];
+function saveCSV(array, title) {
+  var csvOutput = "";
+  for (let row of array) {
+    for (let col of row) {
+      csvOutput += col + ",";
     }
-    csv += "\r\n";
+    csvOutput += "\r\n";
   }
   // (C) CREATE BLOB OBJECT
-  var myBlob = new Blob([csv], { type: "text/csv" });
+  var myBlob = new Blob([csvOutput], { type: "text/csv" });
 
   // (D) CREATE DOWNLOAD LINK
   var url = window.URL.createObjectURL(myBlob);
   var anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = "demo.csv";
+  anchor.download = title + ".csv";
+
+  // (E) "FORCE DOWNLOAD"
+  // NOTE: MAY NOT ALWAYS WORK DUE TO BROWSER SECURITY
+  // BETTER TO LET USERS CLICK ON THEIR OWN
+  anchor.click();
+  window.URL.revokeObjectURL(url);
+  anchor.remove();
+}
+
+// arr to TSV
+function saveTSV(array, title) {
+  var csvOutput = "";
+  for (let row of array) {
+    for (let col of row) {
+      csvOutput += col + "\t";
+    }
+    csvOutput += "\r\n";
+  }
+  // (C) CREATE BLOB OBJECT
+  var myBlob = new Blob([csvOutput], { type: "text/csv" });
+
+  // (D) CREATE DOWNLOAD LINK
+  var url = window.URL.createObjectURL(myBlob);
+  var anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = title + ".tsv";
 
   // (E) "FORCE DOWNLOAD"
   // NOTE: MAY NOT ALWAYS WORK DUE TO BROWSER SECURITY
@@ -132,7 +157,7 @@ function convertToTSV(objArray, fileName) {
   }
 
   // (C) CREATE BLOB OBJECT
-  var myBlob = new Blob([str], { type: "text/csv" });
+  var myBlob = new Blob([str], { type: "text/tsv" });
 
   // (D) CREATE DOWNLOAD LINK
   var url = window.URL.createObjectURL(myBlob);
@@ -173,13 +198,16 @@ myForm.addEventListener("submit", function (e) {
     }));
     //console.log(typeof preProcessList);
     const preProcessEntries = Object.values(preProcessList);
-    //convertToCSV(preProcessEntries, "preProcess");
-    //convertToTSV(preProcessEntries, "preProcess");
+    convertToCSV(preProcessEntries, "preProcess");
+    convertToTSV(preProcessEntries, "preProcess");
     let keyWordCollection = data.map(({ product_name, keyword }) => ({
       product_name,
       keyword,
     }));
     let keywordProcess = Object.values(keyWordCollection);
+    /**let keywordProcess = Object.entries(keyWordCollection)
+      .slice(0, 14)
+      .map((entry) => entry[1]);*/
     var keyText = JSON.stringify(keywordProcess);
     keyText = keyText.replaceAll("product_name", "");
     keyText = keyText.replaceAll("keyword", "");
@@ -197,7 +225,7 @@ myForm.addEventListener("submit", function (e) {
       const tokens = tokenizer.tokenize(keyText); // 解析データの取得
       tokens.forEach((token) => {
         // 解析結果を順番に取得する
-        console.log(token);
+        //console.log(token);
         if (token.pos == "名詞") {
           nounList.push(token);
         }
@@ -206,19 +234,16 @@ myForm.addEventListener("submit", function (e) {
         counterObj[token.surface_form] =
           1 + (counterObj[token.surface_form] || 0);
       }
-      for (var noun in counterObj) {
-        sortedCount.push([noun, counterObj[noun]]);
-      }
-      console.log(sortedCount);
-    });
-    /** 
+      console.log(counterObj);
+      console.log(typeof counterObj);
+      sortedCount = Object.entries(counterObj);
       sortedCount.sort(function (a, b) {
         return b[1] - a[1];
       });
-      
-      saveArrayCSV(sortedCount);
-    });*/
+      console.log(sortedCount.length);
+      saveCSV(sortedCount, "keyword");
+      saveTSV(sortedCount, "keyword");
+    });
   };
-
   reader.readAsText(input);
 });
