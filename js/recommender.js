@@ -190,7 +190,22 @@ myForm.addEventListener("submit", function (e) {
       tokens.forEach((token) => {
         // 解析結果を順番に取得する
         console.log(token);
+        if (token.pos == "名詞") {
+          nounList.push(token);
+        }
       });
+      for (let token of nounList) {
+        counterObj[token.surface_form] =
+          1 + (counterObj[token.surface_form] || 0);
+      }
+      for (var noun in counterObj) {
+        sortedCount.push([noun, counterObj[noun]]);
+      }
+
+      sortedCount.sort(function (a, b) {
+        return b[1] - a[1];
+      });
+      saveArrayCSV(sortedCount);
     });
   };
 
