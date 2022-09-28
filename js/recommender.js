@@ -181,7 +181,6 @@ myForm.addEventListener("submit", function (e) {
     keyText = keyText.replaceAll(/(?:\r\n|\r|\n)/g, " ");
     keyText = keyText.replaceAll("{", " ");
     keyText = keyText.replaceAll("}", " ");
-    console.log(keyText);
     kuromoji.builder({ dicPath: "./dict" }).build((err, tokenizer) => {
       if (err) {
         console.log(err);
