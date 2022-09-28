@@ -173,14 +173,15 @@ myForm.addEventListener("submit", function (e) {
     }));
     //console.log(typeof preProcessList);
     const preProcessEntries = Object.values(preProcessList);
-    convertToCSV(preProcessEntries, "preProcess");
-    convertToTSV(preProcessEntries, "preProcess");
+    //convertToCSV(preProcessEntries, "preProcess");
+    //convertToTSV(preProcessEntries, "preProcess");
     var keyText = JSON.stringify(preProcessList);
     keyText = keyText.replaceAll(/\|/g, " ");
     keyText = keyText.replaceAll(":", " ");
     keyText = keyText.replaceAll(/(?:\r\n|\r|\n)/g, " ");
     keyText = keyText.replaceAll("{", " ");
     keyText = keyText.replaceAll("}", " ");
+    console.log(keyText);
     kuromoji.builder({ dicPath: "./dict" }).build((err, tokenizer) => {
       if (err) {
         console.log(err);
@@ -204,6 +205,7 @@ myForm.addEventListener("submit", function (e) {
       sortedCount.sort(function (a, b) {
         return b[1] - a[1];
       });
+      console.log(sortedCount);
       saveArrayCSV(sortedCount);
     });
   };
