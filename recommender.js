@@ -175,13 +175,21 @@ myForm.addEventListener("submit", function (e) {
     const preProcessEntries = Object.values(preProcessList);
     //convertToCSV(preProcessEntries, "preProcess");
     //convertToTSV(preProcessEntries, "preProcess");
-    var keyText = JSON.stringify(preProcessList);
+    let keyWordCollection = data.map(({ product_name, keyword }) => ({
+      product_name,
+      keyword,
+    }));
+    let keywordProcess = Object.values(keyWordCollection);
+    var keyText = JSON.stringify(keywordProcess);
+    keyText = keyText.replaceAll("product_name", "");
+    keyText = keyText.replaceAll("keyword", "");
     keyText = keyText.replaceAll(/\|/g, " ");
     keyText = keyText.replaceAll(":", " ");
     keyText = keyText.replaceAll(/(?:\r\n|\r|\n)/g, " ");
     keyText = keyText.replaceAll("{", " ");
     keyText = keyText.replaceAll("}", " ");
     console.log(keyText);
+
     kuromoji.builder({ dicPath: "./dict" }).build((err, tokenizer) => {
       if (err) {
         console.log(err);
@@ -201,13 +209,15 @@ myForm.addEventListener("submit", function (e) {
       for (var noun in counterObj) {
         sortedCount.push([noun, counterObj[noun]]);
       }
-
+      console.log(sortedCount);
+    });
+    /** 
       sortedCount.sort(function (a, b) {
         return b[1] - a[1];
       });
-      console.log(sortedCount);
+      
       saveArrayCSV(sortedCount);
-    });
+    });*/
   };
 
   reader.readAsText(input);
