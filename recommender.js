@@ -1,14 +1,19 @@
 const myForm = document.getElementById("myForm");
 const myFile = document.getElementById("myFile");
 const keywordList = [];
+var arrayLength = 0;
 
-//
+function failureCallback() {
+  console.log("This is failure callback");
+}
+
 function tsvToArray(str, delimiter = "\t") {
   const headers = str.slice(0, str.indexOf("\n")).split(delimiter);
   for (var i = 0; i < headers.length; i++) {
     headers[i] = headers[i].replace(/"/g, "");
   }
   const rows = str.slice(str.indexOf("\n") + 1).split("\n");
+  arrayLength = rows.legnth;
 
   const arr = rows.map(function (row) {
     const values = row.split(delimiter);
@@ -59,6 +64,7 @@ function getFifteen(arr) {
 function saveCSV(array, title) {
   var csvOutput = "";
   for (let row of array) {
+    csvOutput += row + "\r\n";
     for (let col of row) {
       csvOutput += col + ",";
     }
@@ -173,16 +179,19 @@ function convertToTSV(objArray, fileName) {
   anchor.remove();
 }
 
+var processItem = {},
+  processItems = [];
+
 myForm.addEventListener("submit", function (e) {
   e.preventDefault();
   const input = myFile.files[0];
   const fileExtention = myFile.files[0].type;
   const reader = new FileReader();
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   let data;
   let nounList = [];
   let sortedCount = [];
-  let counterObj = {};
-
+  var keyList = {};
   reader.onload = function (e) {
     const DICT_PATH = "./dict";
     const text = e.target.result;
@@ -191,59 +200,72 @@ myForm.addEventListener("submit", function (e) {
     } else if (fileExtention === "text/csv") {
       data = csvToArray(text);
     }
+    console.log(data.length);
     let preProcessList = data.map(({ product_id, product_name, keyword }) => ({
       product_id,
       product_name,
       keyword,
     }));
-    //console.log(typeof preProcessList);
     const preProcessEntries = Object.values(preProcessList);
-    convertToCSV(preProcessEntries, "preProcess");
-    convertToTSV(preProcessEntries, "preProcess");
-    let keyWordCollection = data.map(({ product_name, keyword }) => ({
-      product_name,
-      keyword,
-    }));
-    let keywordProcess = Object.values(keyWordCollection);
-    /**let keywordProcess = Object.entries(keyWordCollection)
-      .slice(0, 14)
-      .map((entry) => entry[1]);*/
-    var keyText = JSON.stringify(keywordProcess);
-    keyText = keyText.replaceAll("product_name", "");
-    keyText = keyText.replaceAll("keyword", "");
-    keyText = keyText.replaceAll(/\|/g, " ");
-    keyText = keyText.replaceAll(":", " ");
-    keyText = keyText.replaceAll(/(?:\r\n|\r|\n)/g, " ");
-    keyText = keyText.replaceAll("{", " ");
-    keyText = keyText.replaceAll("}", " ");
-    console.log(keyText);
+    //convertToCSV(preProcessEntries, "preProcess");
+    //convertToTSV(preProcessEntries, "preProcess");
+    let keyWordCollection = data.map(
+      ({ product_id, product_name, keyword }) => ({
+        product_id,
+        product_name,
+        keyword,
+      }),
+    );
+    //let productList = _.pluck(preProcessList, "product_id");
+    //let keywordProcess = Object.entries(keyWordCollection);
+    let keywordProcess = Object.entries(keyWordCollection)
+      .slice(0, 20)
+      .map((entry) => entry[1]);
 
-    kuromoji.builder({ dicPath: "./dict" }).build((err, tokenizer) => {
-      if (err) {
-        console.log(err);
-      }
-      const tokens = tokenizer.tokenize(keyText); // 解析データの取得
-      tokens.forEach((token) => {
-        // 解析結果を順番に取得する
-        //console.log(token);
-        if (token.pos == "名詞") {
-          nounList.push(token);
+    keywordProcess.forEach((product) => {
+      //console.log(product["product_id"]);
+      let keyText = JSON.stringify(product["keyword"]);
+      var keywordNoun = "";
+      //keyText = keyText.replaceAll(/\|/g, " ");
+      kuromoji.builder({ dicPath: "./dict" }).build((err, tokenizer) => {
+        if (err) {
+          console.log(err);
         }
+        const tokens = tokenizer.tokenize(keyText);
+        //console.log(tokens);
+        tokens.forEach((token) => {
+          if (token.pos == "名詞") {
+            nounList.push(token.surface_form);
+          }
+        });
+        for (noun in nounList) {
+          keywordNoun += nounList[noun];
+          keywordNoun += ",";
+        }
+        processItems.push({
+          product_id: product["product_name"],
+          keyword: keywordNoun,
+        });
+        nounList = [];
+        keywordNoun = "";
+        //keywordNoun.replace(String.fromCharCode(92), " ");
       });
-      for (let token of nounList) {
-        counterObj[token.surface_form] =
-          1 + (counterObj[token.surface_form] || 0);
-      }
-      console.log(counterObj);
-      console.log(typeof counterObj);
-      sortedCount = Object.entries(counterObj);
-      sortedCount.sort(function (a, b) {
-        return b[1] - a[1];
-      });
-      console.log(sortedCount.length);
-      saveCSV(sortedCount, "keyword");
-      saveTSV(sortedCount, "keyword");
     });
+    wait(20 * 1000)
+      .then(() => {
+        console.log(processItems);
+        convertToCSV(processItems, "process");
+        convertToTSV(processItems, "process");
+      })
+      .catch(() => {});
   };
+
   reader.readAsText(input);
 });
+/** 
+processItems.push({
+  product_id: product["product_id"],
+  keyword: nounList[noun],
+});*/
+//convertToCSV(processItems, "process");
+//convertToTSV(processItems, "process");
