@@ -193,6 +193,7 @@ myForm.addEventListener("submit", function (e) {
   let sortedCount = [];
   var keyList = {};
   reader.onload = function (e) {
+    var keywordNoun = "";
     const DICT_PATH = "./dict";
     const text = e.target.result;
     if (fileExtention === "text/tab-separated-values") {
@@ -200,58 +201,68 @@ myForm.addEventListener("submit", function (e) {
     } else if (fileExtention === "text/csv") {
       data = csvToArray(text);
     }
-    console.log(data.length);
-    let preProcessList = data.map(({ product_id, product_name, keyword }) => ({
-      product_id,
-      product_name,
-      keyword,
-    }));
-    const preProcessEntries = Object.values(preProcessList);
-    //convertToCSV(preProcessEntries, "preProcess");
-    //convertToTSV(preProcessEntries, "preProcess");
-    let keyWordCollection = data.map(
-      ({ product_id, product_name, keyword }) => ({
-        product_id,
-        product_name,
-        keyword,
-      }),
-    );
-    //let productList = _.pluck(preProcessList, "product_id");
-    //let keywordProcess = Object.entries(keyWordCollection);
-    let keywordProcess = Object.entries(keyWordCollection)
-      .slice(0, 20)
-      .map((entry) => entry[1]);
+    wait(1000)
+      .then(() => {
+        var maxCount = data.length;
+        let preProcessList = data.map(
+          ({ product_id, product_name, keyword }) => ({
+            product_id,
+            product_name,
+            keyword,
+          }),
+        );
+        const preProcessEntries = Object.values(preProcessList);
+        //convertToCSV(preProcessEntries, "preProcess");
+        //convertToTSV(preProcessEntries, "preProcess");
+        let keyWordCollection = data.map(
+          ({ product_id, product_name, keyword }) => ({
+            product_id,
+            product_name,
+            keyword,
+          }),
+        );
+        var count = 0;
+        do {
+          var endCount = count + 40;
+          let keywordProcess = Object.entries(keyWordCollection)
+            .slice(count, endCount)
+            .map((entry) => entry[1]);
 
-    keywordProcess.forEach((product) => {
-      //console.log(product["product_id"]);
-      let keyText = JSON.stringify(product["keyword"]);
-      var keywordNoun = "";
-      //keyText = keyText.replaceAll(/\|/g, " ");
-      kuromoji.builder({ dicPath: "./dict" }).build((err, tokenizer) => {
-        if (err) {
-          console.log(err);
-        }
-        const tokens = tokenizer.tokenize(keyText);
-        //console.log(tokens);
-        tokens.forEach((token) => {
-          if (token.pos == "名詞") {
-            nounList.push(token.surface_form);
-          }
-        });
-        for (noun in nounList) {
-          keywordNoun += nounList[noun];
-          keywordNoun += ",";
-        }
-        processItems.push({
-          product_id: product["product_name"],
-          keyword: keywordNoun,
-        });
-        nounList = [];
-        keywordNoun = "";
-        //keywordNoun.replace(String.fromCharCode(92), " ");
-      });
-    });
-    wait(20 * 1000)
+          keywordProcess.forEach((product) => {
+            //console.log(product["product_id"]);
+            let keyText = JSON.stringify(product["keyword"]);
+            keyText = keyText.replaceAll(/\|/g, ",").replaceAll(/\\/g, "");
+
+            kuromoji.builder({ dicPath: "./dict" }).build((err, tokenizer) => {
+              if (err) {
+                console.log(err);
+              }
+              const tokens = tokenizer.tokenize(keyText);
+              //console.log(tokens);
+              tokens.forEach((token) => {
+                if (token.pos == "名詞") {
+                  nounList.push(token.surface_form);
+                }
+              });
+              for (noun in nounList) {
+                keywordNoun += nounList[noun];
+              }
+              processItems.push({
+                product_id: product["product_id"],
+                keyword: keywordNoun,
+              });
+              nounList = [];
+              keywordNoun = "";
+              console.log(processItems);
+              count = count + 40;
+              //keywordNoun.replace(String.fromCharCode(92), " ");
+            });
+          });
+        } while (count < maxCount);
+      })
+      .catch(() => {});
+
+    wait(60 * 1000)
       .then(() => {
         console.log(processItems);
         convertToCSV(processItems, "process");
