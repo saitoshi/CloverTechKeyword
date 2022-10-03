@@ -198,8 +198,7 @@ myForm.addEventListener("submit", function (e) {
       data = csvToArray(text);
     }
     console.log(data.length);
-    let preProcessList = data.map(({ product_id, product_name, keyword }) => ({
-      product_id,
+    let preProcessList = data.map(({ product_name, keyword }) => ({
       product_name,
       keyword,
     }));
