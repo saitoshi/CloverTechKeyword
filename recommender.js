@@ -64,7 +64,7 @@ function getFifteen(arr) {
 function saveCSV(array, title) {
   var csvOutput = "";
   for (let row of array) {
-    csvOutput += row + "\r\n";
+    csvOutput += row;
     for (let col of row) {
       csvOutput += col + ",";
     }
@@ -191,7 +191,6 @@ myForm.addEventListener("submit", function (e) {
   let nounList = [];
   reader.onload = function (e) {
     var keywordNoun = "";
-    const DICT_PATH = "./dict";
     const text = e.target.result;
     if (fileExtention === "text/tab-separated-values") {
       data = tsvToArray(text);
@@ -204,6 +203,9 @@ myForm.addEventListener("submit", function (e) {
       product_name,
       keyword,
     }));
+    const preProcessEntries = Object.values(preProcessList);
+    //convertToCSV(preProcessEntries, "preProcess");
+    //convertToTSV(preProcessEntries, "preProcess");
     let keyWordCollection = data.map(
       ({ product_id, product_name, keyword }) => ({
         product_id,
@@ -213,7 +215,7 @@ myForm.addEventListener("submit", function (e) {
     );
 
     let keywordProcess = Object.entries(keyWordCollection)
-      .slice(0, data.length)
+      .slice(0, 500)
       .map((entry) => entry[1]);
     keywordProcess.forEach((product) => {
       //console.log(product["product_id"]);
@@ -254,11 +256,11 @@ myForm.addEventListener("submit", function (e) {
       nounList = [];
       keywordNoun = "";
     });
-    wait(60 * 1000)
+    wait(10 * 1000)
       .then(() => {
-        console.log(processItems);
         convertToCSV(processItems, "process");
         convertToTSV(processItems, "process");
+        console.log(processItems);
       })
       .catch(() => {});
   };
