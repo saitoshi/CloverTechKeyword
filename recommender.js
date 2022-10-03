@@ -204,8 +204,8 @@ myForm.addEventListener("submit", function (e) {
       keyword,
     }));
     const preProcessEntries = Object.values(preProcessList);
-    //convertToCSV(preProcessEntries, "preProcess");
-    //convertToTSV(preProcessEntries, "preProcess");
+    convertToCSV(preProcessEntries, "preProcess");
+    convertToTSV(preProcessEntries, "preProcess");
     let keyWordCollection = data.map(
       ({ product_id, product_name, keyword }) => ({
         product_id,
@@ -215,7 +215,7 @@ myForm.addEventListener("submit", function (e) {
     );
 
     let keywordProcess = Object.entries(keyWordCollection)
-      .slice(0, data.length)
+      .slice(0, data.length - 1)
       .map((entry) => entry[1]);
     keywordProcess.forEach((product) => {
       //console.log(product["product_id"]);
@@ -224,8 +224,6 @@ myForm.addEventListener("submit", function (e) {
         .replaceAll(/\|/g, ",")
         .replaceAll(/\\/g, String.fromCharCode(160));
       var keywordNoun = "";
-      //let productList = _.pluck(preProcessList, "product_id");
-      //let keywordProcess = Object.entries(keyWordCollection);
       rma = new RakutenMA(model_ja);
       rma.featset = RakutenMA.default_featset_ja;
       rma.hash_func = RakutenMA.create_hash_func(15);
@@ -256,14 +254,14 @@ myForm.addEventListener("submit", function (e) {
       nounList = [];
       keywordNoun = "";
     });
-    wait(200 * 1000)
-      .then(() => {
-        convertToCSV(processItems, "process");
-        convertToTSV(processItems, "process");
-        console.log(processItems);
-      })
-      .catch(() => {});
+    setTimeout(exportFile(processItems, "process"), 60000);
   };
 
   reader.readAsText(input);
 });
+
+function exportFile(object, filename) {
+  convertToCSV(object, filename);
+  convertToTSV(object, filename);
+  console.log(object);
+}
