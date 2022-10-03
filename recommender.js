@@ -190,8 +190,6 @@ myForm.addEventListener("submit", function (e) {
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   let data;
   let nounList = [];
-  let sortedCount = [];
-  var keyList = {};
   reader.onload = function (e) {
     const DICT_PATH = "./dict";
     const text = e.target.result;
@@ -219,12 +217,15 @@ myForm.addEventListener("submit", function (e) {
     //let productList = _.pluck(preProcessList, "product_id");
     //let keywordProcess = Object.entries(keyWordCollection);
     let keywordProcess = Object.entries(keyWordCollection)
-      .slice(0, 20)
+      .slice(0, 100)
       .map((entry) => entry[1]);
 
     keywordProcess.forEach((product) => {
       //console.log(product["product_id"]);
       let keyText = JSON.stringify(product["keyword"]);
+      keyText = keyText
+        .replaceAll(/\|/g, ",")
+        .replaceAll(/\\/g, String.fromCharCode(160));
       var keywordNoun = "";
       //keyText = keyText.replaceAll(/\|/g, " ");
       kuromoji.builder({ dicPath: "./dict" }).build((err, tokenizer) => {
@@ -240,10 +241,9 @@ myForm.addEventListener("submit", function (e) {
         });
         for (noun in nounList) {
           keywordNoun += nounList[noun];
-          keywordNoun += ",";
         }
         processItems.push({
-          product_id: product["product_name"],
+          product_id: product["product_id"],
           keyword: keywordNoun,
         });
         nounList = [];
@@ -251,7 +251,7 @@ myForm.addEventListener("submit", function (e) {
         //keywordNoun.replace(String.fromCharCode(92), " ");
       });
     });
-    wait(20 * 1000)
+    wait(100 * 1000)
       .then(() => {
         console.log(processItems);
         convertToCSV(processItems, "process");
