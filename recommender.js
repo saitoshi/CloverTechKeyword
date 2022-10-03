@@ -250,7 +250,7 @@ myForm.addEventListener("submit", function (e) {
     );
 
     let keywordProcess = Object.entries(keyWordCollection)
-      .slice(0, data.length - 1)
+      .slice(0, 4000)
       .map((entry) => entry[1]);
     keywordProcess.forEach((product) => {
       //console.log(product["product_id"]);
@@ -308,8 +308,8 @@ myForm.addEventListener("submit", function (e) {
         }
       }
 
-      console.log(_.uniq(finalCategoryList));
-      console.log(_.uniq(finalSubCategoryList));
+      finalCategoryList = _.uniq(finalCategoryList);
+      finalSubCategoryList = _.uniq(finalSubCategoryList);
 
       for (noun in nounList) {
         keywordNoun += nounList[noun];
@@ -326,17 +326,21 @@ myForm.addEventListener("submit", function (e) {
     finalSubCategoryList = _.uniq(finalSubCategoryList);
     console.log(finalCategoryList);
     console.log(finalSubCategoryList);
-    for (let category of finalCategoryList) {
-      for (let subCategory of finalSubCategoryList) {
-        categoryCombination.push({
-          カテゴリー: category,
-          サブカテゴリー: subCategory,
-        });
+    for (let i = 0; i < finalCategoryList.length; i++) {
+      for (let j = 0; j < finalSubCategoryList.length; j++) {
+        if (finalCategoryList[i] != finalSubCategoryList[j]) {
+          console.log(finalCategoryList[i] + "&" + finalSubCategoryList[j]);
+          categoryCombination.push({
+            カテゴリ名: finalCategoryList[i],
+            サブカテゴリ: finalSubCategoryList[j],
+          });
+        }
       }
     }
-    console.log(categoryCombination);
-    setTimeout(exportFile(processItems, "process"), 60000);
-    setTimeout(exportFile(categoryCollection, "categoryCombo", 61000));
+
+    setTimeout(console.log(categoryCombination), 2000);
+    //setTimeout(exportFile(processItems, "process"), 60000);
+    setTimeout(exportFile(categoryCombination, "categoryCombo", 61000));
   };
 
   reader.readAsText(input);
