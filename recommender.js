@@ -64,7 +64,7 @@ function getFifteen(arr) {
 function saveCSV(array, title) {
   var csvOutput = "";
   for (let row of array) {
-    csvOutput += row;
+    csvOutput += row + "\n";
     for (let col of row) {
       csvOutput += col + ",";
     }
@@ -117,7 +117,7 @@ function saveTSV(array, title) {
 function convertToCSV(objArray, fileName) {
   var array = typeof objArray != "object" ? JSON.parse(objArray) : objArray;
   var str = "";
-  str += Object.keys(objArray[0]);
+  str += Object.keys(objArray[0]) + "\n";
   for (var i = 0; i < array.length; i++) {
     var line = "";
     for (var index in array[i]) {
