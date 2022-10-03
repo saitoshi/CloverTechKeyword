@@ -151,7 +151,7 @@ function convertToCSV(objArray, fileName) {
 function convertToTSV(objArray, fileName) {
   var array = typeof objArray != "object" ? JSON.parse(objArray) : objArray;
   var str = "";
-  str += Object.keys(objArray[0]);
+  str += Object.keys(objArray[0]) + "\n";
   for (var i = 0; i < array.length; i++) {
     var line = "";
     for (var index in array[i]) {
@@ -262,14 +262,15 @@ myForm.addEventListener("submit", function (e) {
         }
       }
 
+      nounList = _.uniq(nounList);
+      console.log(nounList);
       for (noun in nounList) {
         keywordNoun += nounList[noun];
         keywordNoun += ",";
       }
-      console.log(keywordNoun);
       processItems.push({
         product_id: product["product_id"],
-        keyword: keywordNoun,
+        keyword_noun: keywordNoun,
       });
       nounList = [];
       keywordNoun = "";
