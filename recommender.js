@@ -179,7 +179,7 @@ function convertToTSV(objArray, fileName) {
   window.URL.revokeObjectURL(url);
   anchor.remove();
 }
-
+var categoryCombination = [];
 var processItem = {},
   processItems = [];
 myForm.addEventListener("submit", function (e) {
@@ -197,15 +197,50 @@ myForm.addEventListener("submit", function (e) {
     } else if (fileExtention === "text/csv") {
       data = csvToArray(text);
     }
-    console.log(data.length);
+
+    let categoryCollection = data.map(
+      ({ category_name, sub_category_name }) => ({
+        category_name,
+        sub_category_name,
+      }),
+    );
+    let categoryList = [];
+    let subCategoryList = [];
+    let finalCategoryList = [];
+    let finalSubCategoryList = [];
+
+    let categoryProcess = Object.entries(categoryCollection)
+      .slice(0, data.length - 1)
+      .map((entry) => entry[1]);
+    categoryProcess.forEach((name) => {
+      categoryList.push(name["category_name"]);
+      subCategoryList.push(name["sub_category_name"]);
+    });
+
+    let categoryText = categoryList
+      .toString()
+      .replace(/"/g, String.fromCharCode(160))
+      .replace(/\s/g, "");
+    let subCategoryText = subCategoryList
+      .toString()
+      .replace(/"/g, String.fromCharCode(160))
+      .replace(/\s/g, "");
+    categoryList = [];
+    subCategoryList = [];
+    categoryList = categoryText.split(",");
+    categoryList = _.uniq(categoryList);
+
+    subCategoryList = subCategoryText.split(",");
+    subCategoryList = _.uniq(subCategoryList);
+
     let preProcessList = data.map(({ product_id, product_name, keyword }) => ({
       product_id,
       product_name,
       keyword,
     }));
     const preProcessEntries = Object.values(preProcessList);
-    convertToCSV(preProcessEntries, "preProcess");
-    convertToTSV(preProcessEntries, "preProcess");
+    //convertToCSV(preProcessEntries, "preProcess");
+    //convertToTSV(preProcessEntries, "preProcess");
     let keyWordCollection = data.map(
       ({ product_id, product_name, keyword }) => ({
         product_id,
@@ -263,7 +298,19 @@ myForm.addEventListener("submit", function (e) {
       }
 
       nounList = _.uniq(nounList);
-      console.log(nounList);
+
+      for (var i = 0; i < nounList.length; i++) {
+        let currentNoun = nounList[i];
+        if (categoryList.includes(currentNoun)) {
+          finalCategoryList.push(currentNoun);
+        } else if (subCategoryList.includes(currentNoun)) {
+          finalSubCategoryList.push(currentNoun);
+        }
+      }
+
+      console.log(_.uniq(finalCategoryList));
+      console.log(_.uniq(finalSubCategoryList));
+
       for (noun in nounList) {
         keywordNoun += nounList[noun];
         keywordNoun += ",";
@@ -275,7 +322,21 @@ myForm.addEventListener("submit", function (e) {
       nounList = [];
       keywordNoun = "";
     });
+    finalCategoryList = _.uniq(finalCategoryList);
+    finalSubCategoryList = _.uniq(finalSubCategoryList);
+    console.log(finalCategoryList);
+    console.log(finalSubCategoryList);
+    for (let category of finalCategoryList) {
+      for (let subCategory of finalSubCategoryList) {
+        categoryCombination.push({
+          カテゴリー: category,
+          サブカテゴリー: subCategory,
+        });
+      }
+    }
+    console.log(categoryCombination);
     setTimeout(exportFile(processItems, "process"), 60000);
+    setTimeout(exportFile(categoryCollection, "categoryCombo", 61000));
   };
 
   reader.readAsText(input);
