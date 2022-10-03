@@ -215,7 +215,7 @@ myForm.addEventListener("submit", function (e) {
     );
 
     let keywordProcess = Object.entries(keyWordCollection)
-      .slice(0, 500)
+      .slice(0, data.length)
       .map((entry) => entry[1]);
     keywordProcess.forEach((product) => {
       //console.log(product["product_id"]);
@@ -256,7 +256,7 @@ myForm.addEventListener("submit", function (e) {
       nounList = [];
       keywordNoun = "";
     });
-    wait(10 * 1000)
+    wait(200 * 1000)
       .then(() => {
         convertToCSV(processItems, "process");
         convertToTSV(processItems, "process");
