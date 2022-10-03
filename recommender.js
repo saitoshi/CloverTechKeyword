@@ -1,5 +1,6 @@
 const myForm = document.getElementById("myForm");
 const myFile = document.getElementById("myFile");
+const myInput = document.getElementById("myInput");
 const keywordList = [];
 var arrayLength = 0;
 
@@ -190,7 +191,6 @@ myForm.addEventListener("submit", function (e) {
   let data;
   let nounList = [];
   reader.onload = function (e) {
-    var keywordNoun = "";
     const text = e.target.result;
     if (fileExtention === "text/tab-separated-values") {
       data = tsvToArray(text);
@@ -198,7 +198,8 @@ myForm.addEventListener("submit", function (e) {
       data = csvToArray(text);
     }
     console.log(data.length);
-    let preProcessList = data.map(({ product_name, keyword }) => ({
+    let preProcessList = data.map(({ product_id, product_name, keyword }) => ({
+      product_id,
       product_name,
       keyword,
     }));
@@ -219,7 +220,11 @@ myForm.addEventListener("submit", function (e) {
     keywordProcess.forEach((product) => {
       //console.log(product["product_id"]);
       let keyText = JSON.stringify(product["keyword"]);
+      let nameText = JSON.stringify(product["product_name"]);
       keyText = keyText
+        .replaceAll(/\|/g, ",")
+        .replaceAll(/\\/g, String.fromCharCode(160));
+      nameText = nameText
         .replaceAll(/\|/g, ",")
         .replaceAll(/\\/g, String.fromCharCode(160));
       var keywordNoun = "";
@@ -230,6 +235,21 @@ myForm.addEventListener("submit", function (e) {
         HanZenKaku.hs2fs(HanZenKaku.hw2fw(HanZenKaku.h2z(keyText))),
       );
 
+      var nameTokens = rma.tokenize(
+        HanZenKaku.hs2fs(HanZenKaku.hw2fw(HanZenKaku.h2z(nameText))),
+      );
+
+      for (let i = 0; i < nameTokens.length; i++) {
+        for (let j = 0; j < nameTokens[i].length; j++) {
+          if (
+            nameTokens[i][j] == "N-n" ||
+            nameTokens[i][j] == "N-nc" ||
+            nameTokens[i][j] == "N-pn"
+          ) {
+            nounList.push(nameTokens[i][j - 1]);
+          }
+        }
+      }
       for (let i = 0; i < tokens.length; i++) {
         for (let j = 0; j < tokens[i].length; j++) {
           if (
@@ -237,15 +257,16 @@ myForm.addEventListener("submit", function (e) {
             tokens[i][j] == "N-nc" ||
             tokens[i][j] == "N-pn"
           ) {
-            console.log(tokens[i][j - 1]);
             nounList.push(tokens[i][j - 1]);
           }
         }
       }
+
       for (noun in nounList) {
         keywordNoun += nounList[noun];
-        keywordNoun += " , ";
+        keywordNoun += ",";
       }
+      console.log(keywordNoun);
       processItems.push({
         product_id: product["product_id"],
         keyword: keywordNoun,
