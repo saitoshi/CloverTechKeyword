@@ -181,7 +181,6 @@ function convertToTSV(objArray, fileName) {
 
 var processItem = {},
   processItems = [];
-
 myForm.addEventListener("submit", function (e) {
   e.preventDefault();
   const input = myFile.files[0];
@@ -205,9 +204,6 @@ myForm.addEventListener("submit", function (e) {
       product_name,
       keyword,
     }));
-    const preProcessEntries = Object.values(preProcessList);
-    //convertToCSV(preProcessEntries, "preProcess");
-    //convertToTSV(preProcessEntries, "preProcess");
     let keyWordCollection = data.map(
       ({ product_id, product_name, keyword }) => ({
         product_id,
@@ -215,12 +211,10 @@ myForm.addEventListener("submit", function (e) {
         keyword,
       }),
     );
-    //let productList = _.pluck(preProcessList, "product_id");
-    //let keywordProcess = Object.entries(keyWordCollection);
-    let keywordProcess = Object.entries(keyWordCollection)
-      .slice(0, 100)
-      .map((entry) => entry[1]);
 
+    let keywordProcess = Object.entries(keyWordCollection)
+      .slice(0, data.length)
+      .map((entry) => entry[1]);
     keywordProcess.forEach((product) => {
       //console.log(product["product_id"]);
       let keyText = JSON.stringify(product["keyword"]);
@@ -228,31 +222,39 @@ myForm.addEventListener("submit", function (e) {
         .replaceAll(/\|/g, ",")
         .replaceAll(/\\/g, String.fromCharCode(160));
       var keywordNoun = "";
-      //keyText = keyText.replaceAll(/\|/g, " ");
-      kuromoji.builder({ dicPath: "./dict" }).build((err, tokenizer) => {
-        if (err) {
-          console.log(err);
-        }
-        const tokens = tokenizer.tokenize(keyText);
-        //console.log(tokens);
-        tokens.forEach((token) => {
-          if (token.pos == "名詞") {
-            nounList.push(token.surface_form);
+      //let productList = _.pluck(preProcessList, "product_id");
+      //let keywordProcess = Object.entries(keyWordCollection);
+      rma = new RakutenMA(model_ja);
+      rma.featset = RakutenMA.default_featset_ja;
+      rma.hash_func = RakutenMA.create_hash_func(15);
+      var tokens = rma.tokenize(
+        HanZenKaku.hs2fs(HanZenKaku.hw2fw(HanZenKaku.h2z(keyText))),
+      );
+
+      for (let i = 0; i < tokens.length; i++) {
+        for (let j = 0; j < tokens[i].length; j++) {
+          if (
+            tokens[i][j] == "N-n" ||
+            tokens[i][j] == "N-nc" ||
+            tokens[i][j] == "N-pn"
+          ) {
+            console.log(tokens[i][j - 1]);
+            nounList.push(tokens[i][j - 1]);
           }
-        });
-        for (noun in nounList) {
-          keywordNoun += nounList[noun];
         }
-        processItems.push({
-          product_id: product["product_id"],
-          keyword: keywordNoun,
-        });
-        nounList = [];
-        keywordNoun = "";
-        //keywordNoun.replace(String.fromCharCode(92), " ");
+      }
+      for (noun in nounList) {
+        keywordNoun += nounList[noun];
+        keywordNoun += " , ";
+      }
+      processItems.push({
+        product_id: product["product_id"],
+        keyword: keywordNoun,
       });
+      nounList = [];
+      keywordNoun = "";
     });
-    wait(100 * 1000)
+    wait(60 * 1000)
       .then(() => {
         console.log(processItems);
         convertToCSV(processItems, "process");
@@ -263,10 +265,3 @@ myForm.addEventListener("submit", function (e) {
 
   reader.readAsText(input);
 });
-/** 
-processItems.push({
-  product_id: product["product_id"],
-  keyword: nounList[noun],
-});*/
-//convertToCSV(processItems, "process");
-//convertToTSV(processItems, "process");

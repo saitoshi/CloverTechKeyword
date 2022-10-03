@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<head>
+
+</head>
+
+<body>
+    <h2 style="text-align: center; font-weight: bold;">YUSP Keyword Test</h2>
+    <hr />
+    <form id="myForm">
+        <input type="file" id="myFile" />
+        <br />
+        <input type="submit" value="Submit" />
+    </form>
+    <hr />
+</body>
+<script type="text/javascript" src="js/rakutenma.js" charset="UTF-8"></script>
+<script type="text/javascript" src="js/model_ja.js" charset="UTF-8"></script>
+<script type="text/javascript" src="js/hanzenkaku.js" charset="UTF-8"></script>
+<script type="text/javascript" charset="UTF-8">
+    function Segment() {
+
+        rma = new RakutenMA(model);
+        rma.featset = RakutenMA.default_featset_ja;
+        rma.hash_func = RakutenMA.create_hash_func(15);
+
+        var textarea = document.getElementById("input");
+        var result = document.getElementById("output");
+        var tokens = rma.tokenize(HanZenKaku.hs2fs(HanZenKaku.hw2fw(HanZenKaku.h2z(textarea.value))));
+
+        result.style.display = 'block';
+        result.innerHTML = RakutenMA.tokens2string(tokens);
+    }
+    const myForm = document.getElementById("myForm");
+    const myFile = document.getElementById("myFile");
+    const keywordList = [];
+
+    function tsvToArray(str, delimiter = "\t") {
+        const headers = str.slice(0, str.indexOf("\n")).split(delimiter);
+        for (var i = 0; i < headers.length; i++) {
+            headers[i] = headers[i].replace(/"/g, "");
+        }
+        const rows = str.slice(str.indexOf("\n") + 1).split("\n");
+        arrayLength = rows.legnth;
+
+        const arr = rows.map(function (row) {
+            const values = row.split(delimiter);
+            const el = headers.reduce(function (object, header, index) {
+                object[header] = values[index];
+                return object;
+            }, {});
+            return el;
+        });
+        return arr;
+    }
+    var processItem = {},
+        processItems = [];
+
+    myForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const input = myFile.files[0];
+        const fileExtention = myFile.files[0].type;
+        const reader = new FileReader();
+        const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+        let data;
+        let nounList = [];
+        reader.onload = function (e) {
+            var keywordNoun = "";
+            const DICT_PATH = "./dict";
+            const text = e.target.result;
+            if (fileExtention === "text/tab-separated-values") {
+                data = tsvToArray(text);
+            } else if (fileExtention === "text/csv") {
+                data = csvToArray(text);
+            }
+            console.log(data.length);
+            let preProcessList = data.map(({ product_id, product_name, keyword }) => ({
+                product_id,
+                product_name,
+                keyword,
+            }));
+            let keyWordCollection = data.map(
+                ({ product_id, product_name, keyword }) => ({
+                    product_id,
+                    product_name,
+                    keyword,
+                }),
+            );
+
+            let keywordProcess = Object.entries(keyWordCollection)
+                .slice(0, 2)
+                .map((entry) => entry[1]);
+            keywordProcess.forEach((product) => {
+                //console.log(product["product_id"]);
+                let keyText = JSON.stringify(product["keyword"]);
+                keyText = keyText
+                    .replaceAll(/\|/g, ",")
+                    .replaceAll(/\\/g, String.fromCharCode(160));
+                var keywordNoun = "";
+                //let productList = _.pluck(preProcessList, "product_id");
+                //let keywordProcess = Object.entries(keyWordCollection);
+                rma = new RakutenMA(model_ja);
+                rma.featset = RakutenMA.default_featset_ja;
+                rma.hash_func = RakutenMA.create_hash_func(15);
+                var tokens = rma.tokenize(HanZenKaku.hs2fs(HanZenKaku.hw2fw(HanZenKaku.h2z(keyText))));
+
+                for (let i = 0; i < tokens.length; i++) {
+                    for (let j = 0; j < tokens[i].length; j++) {
+                        if (tokens[i][j] == "N-n" || tokens[i][j] == "N-nc" || tokens[i][j] == "N-pn") {
+                            console.log(tokens[i][j - 1]);
+                            nounList.push(tokens[i][j - 1]);
+                        }
+                    }
+                }
+                for (noun in nounList) {
+                    keywordNoun += nounList[noun];
+                    keywordNoun += " , ";
+                }
+                processItems.push({
+                    product_id: product["product_id"],
+                    keyword: keywordNoun,
+                });
+                nounList = [];
+                keywordNoun = "";
+            });
+            wait(10 * 1000)
+                .then(() => {
+                    console.log(processItems);
+                    convertToCSV(processItems, "process");
+                    convertToTSV(processItems, "process");
+                })
+                .catch(() => { });
+
+        };
+
+        reader.readAsText(input);
+    });
+</script>
