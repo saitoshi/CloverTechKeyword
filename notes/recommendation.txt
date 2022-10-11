@@ -1,0 +1,24 @@
+@title CloverTech Hashtag Recommendation 
+
+//1st step - keyword を読み込み、それをcategory_nameとsub_category_nameでフィルタリングをする
+// - JavaScript ファイルで商品をまとめたtsv/csvファイルからproduct_id, product_name, category_name, subcategory_name, と keyword 類を取り出す。
+// - 分析前のprodcut_id, product_name, keyword をtsv, csvにまとめてエキスポートをする
+// - 商品数の一つ、一つ確認、product_name, とkeywordを楽天の言語分析で名詞だけをまとめ、それをproduct_id と合わせる
+// - 名詞分析をしたファイルをtsvとcsvファイルとしてエキスポートをする
+//2nd step - フィルタリングされたタグを掛け合わせをする
+// - 大元のファイルからcategory_nameのリストとsub_category_nameのリストを作成する
+// - 名詞キーワードとcategory_nameとsub_categoryがマッチをしているかを確認する
+// - 名詞キーワードがcategoryな場合、categoryというラベリングをつける
+// - 名詞キーワードがsub_categoryな場合、sub_categoryというラベリングをつける
+// - それをproduct_idとまとめてcsvとtsvファイルとして、エキスポートする
+//3rd step - カテゴリーラベリングされたキーワードを掛け合わせする
+// - product_id, フィルタリング分けされたキーワードのtsv/csvファイルを読み込む
+// - その、商品にcategory_nameとsub_categoryの両方があればそれをペアとして合わせる　例 （ベルト、ピンク）
+//4th step - 角商品IDの掛け合わせされたキーワードを一つずつ検索をかける(API,スクレーパー経由)
+// - ペアのキーワードで検索をかける
+//5th step - タグ（category,sub_category）商品のマッチがあればその掛け合わせタグ用のcountをプラスする
+// - 検索結果の数を確認し、それをペアと一緒にリストへ登録する
+// - キーワードがあるかぎり、続ける
+//6th step - かくcountの情報をjsonファイル用にまとめて書き込む
+// - 検索と数えが終わった後、それをjsonファイルに書き込む
+//7th step- jsonファイルをエキスポートする
