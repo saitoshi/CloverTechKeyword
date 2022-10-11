@@ -310,33 +310,36 @@ myForm.addEventListener("submit", function (e) {
 
       finalCategoryList = _.uniq(finalCategoryList);
       finalSubCategoryList = _.uniq(finalSubCategoryList);
-
+      let categoryNounList = "";
+      let subCategoryNounList = "";
       for (noun in nounList) {
-        keywordNoun += nounList[noun];
-        keywordNoun += ",";
+        if (categoryList.includes(nounList[noun])) {
+          categoryNounList += nounList[noun] + " ";
+          keywordNoun += nounList[noun] + " ";
+        } else if (subCategoryList.includes(nounList[noun])) {
+          subCategoryNounList += nounList[noun] + " ";
+          keywordNoun += nounList[noun] + " ";
+        } else {
+          keywordNoun += nounList[noun];
+          keywordNoun += ",";
+        }
       }
       processItems.push({
         product_id: product["product_id"],
         keyword_noun: keywordNoun,
       });
+
+      categoryCombination.push({
+        product_id: product["product_id"],
+        カテゴリー名: categoryNounList,
+        サブカテゴリー名: subCategoryNounList,
+      });
+      console.log(categoryCombination);
       nounList = [];
       keywordNoun = "";
     });
     finalCategoryList = _.uniq(finalCategoryList);
     finalSubCategoryList = _.uniq(finalSubCategoryList);
-    console.log(finalCategoryList);
-    console.log(finalSubCategoryList);
-    for (let i = 0; i < finalCategoryList.length; i++) {
-      for (let j = 0; j < finalSubCategoryList.length; j++) {
-        if (finalCategoryList[i] != finalSubCategoryList[j]) {
-          console.log(finalCategoryList[i] + "&" + finalSubCategoryList[j]);
-          categoryCombination.push({
-            カテゴリ名: finalCategoryList[i],
-            サブカテゴリ: finalSubCategoryList[j],
-          });
-        }
-      }
-    }
 
     setTimeout(console.log(categoryCombination), 2000);
     //setTimeout(exportFile(processItems, "process"), 60000);
