@@ -229,10 +229,10 @@ myForm.addEventListener("submit", function (e) {
     subCategoryList = [];
     categoryList = categoryText.split(",");
     categoryList = _.uniq(categoryList);
-
+    console.log(categoryList);
     subCategoryList = subCategoryText.split(",");
     subCategoryList = _.uniq(subCategoryList);
-
+    console.log(subCategoryList);
     let preProcessList = data.map(({ product_id, product_name, keyword }) => ({
       product_id,
       product_name,
@@ -334,14 +334,14 @@ myForm.addEventListener("submit", function (e) {
         カテゴリー名: categoryNounList,
         サブカテゴリー名: subCategoryNounList,
       });
-      console.log(categoryCombination);
+      //console.log(categoryCombination);
       nounList = [];
       keywordNoun = "";
     });
     finalCategoryList = _.uniq(finalCategoryList);
     finalSubCategoryList = _.uniq(finalSubCategoryList);
 
-    setTimeout(console.log(categoryCombination), 2000);
+    //setTimeout(console.log(categoryCombination), 2000);
     //setTimeout(exportFile(processItems, "process"), 60000);
     setTimeout(exportFile(categoryCombination, "categoryCombo", 61000));
   };
