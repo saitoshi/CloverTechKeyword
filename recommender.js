@@ -181,6 +181,7 @@ function convertToTSV(objArray, fileName) {
 
 var processItem = {},
   processItems = [];
+var categoryCombination = [];
 myForm.addEventListener('submit', function (e) {
   e.preventDefault();
   const input = myFile.files[0];
@@ -251,7 +252,7 @@ myForm.addEventListener('submit', function (e) {
     let dataSize = keyWordCollection.length;
 
     let keywordProcess = Object.entries(keyWordCollection)
-      .slice(0, 100)
+      .slice(0, dataSize - 1)
       .map((entry) => entry[1]);
     keywordProcess.forEach((product) => {
       //console.log(product["product_id"]);
@@ -345,7 +346,7 @@ myForm.addEventListener('submit', function (e) {
     //setTimeout(console.log(categoryCombination), 2000);
     setTimeout(exportFile(processItems, 'process'), 20000);
     setTimeout(exportFile(categoryCombination, 'categoryCombo', 21000));
-    setTimeout(keywordCategoryMatch(processItems, categoryCombination), 2000);
+    //setTimeout(keywordCategoryMatch(processItems, categoryCombination), 2000);
   };
 
   reader.readAsText(input);

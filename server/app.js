@@ -4,7 +4,7 @@ const fs = require('fs');
 const parse = require('csv-parse/sync');
 const { customsearch } = require('googleapis/build/src/apis/customsearch');
 
-const key = 'kf13_kvFe2pzjKJmk32qFQ';
+const key = '#';
 function csvToArray(src) {
   let data = fs.readFileSync(src);
   let dataList = parse.parse(data, {
@@ -112,8 +112,8 @@ async function asyncCall() {
 }
 
 async function sampleSearch() {
-  const CX = 'c77d6fab0571b442d'; // search engine ID
-  const API_KEY = 'AIzaSyAU8Bx0RdbUGp2QFjOnqUWRooJWnQo2xuU';
+  const CX = '#'; // search engine ID
+  const API_KEY = '#';
   const SEARCH = 'HELLO WORLD';
   const { google } = require('googleapis');
   const apis = google.getSupportedAPIs();
