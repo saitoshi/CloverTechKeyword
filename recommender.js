@@ -1,6 +1,5 @@
 const myForm = document.getElementById('myForm');
 const myFile = document.getElementById('myFile');
-const myInput = document.getElementById('myInput');
 const keywordList = [];
 var arrayLength = 0;
 
@@ -151,7 +150,7 @@ function convertToCSV(objArray, fileName) {
 function convertToTSV(objArray, fileName) {
   var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
   var str = '';
-  str += Object.keys(objArray[0]) + '\n';
+  str += Object.keys(objArray[0]);
   for (var i = 0; i < array.length; i++) {
     var line = '';
     for (var index in array[i]) {
@@ -179,7 +178,7 @@ function convertToTSV(objArray, fileName) {
   window.URL.revokeObjectURL(url);
   anchor.remove();
 }
-var categoryCombination = [];
+
 var processItem = {},
   processItems = [];
 myForm.addEventListener('submit', function (e) {
@@ -356,55 +355,4 @@ function exportFile(object, filename) {
   convertToCSV(object, filename);
   convertToTSV(object, filename);
   console.log(object);
-}
-
-function keywordCategoryMatch(nounItems, categoryItems) {
-  // initialize a new collection filled with product_id, (category, keyword ) pair, count
-  let keywordCategoryMatch = [];
-  // loop through each proeuct in the category, subcategory list
-  categoryItems.forEach((category) => {
-    // for each product in the category&subcategory list
-    //console.log(category['product_id']);
-    // get the current product_id
-    let currentProduct = category['product_id'];
-    // get the current keyword of the current product id
-    let currentKeyword = nounItems.find(
-      (x) => x.product_id === currentProduct,
-    ).keyword_noun;
-    // split the keyword into
-    let searchKeyword = currentKeyword.split(' ');
-    //console.log(searchKeyword);
-    let categoryGroup = categoryItems.find(
-      (x) => x.product_id === currentProduct,
-    ).カテゴリー名;
-    let subcategoryGroup = categoryItems.find(
-      (x) => x.product_id === currentProduct,
-    ).サブカテゴリー名;
-
-    if (categoryGroup.length !== 0) {
-      let categoryList = categoryGroup.split(' ');
-      for (let i = 0; i < categoryList.length - 1; i++) {
-        let count = 0;
-        while (count < searchKeyword.length - 1) {
-          if (categoryList[i] !== searchKeyword[count]) {
-            console.log(categoryList[i] + ' , ' + searchKeyword[count]);
-          }
-          count = count + 1;
-        }
-      }
-    }
-
-    if (subcategoryGroup.length !== 0) {
-      let subCategoryList = subcategoryGroup.split(' ');
-      for (let i = 0; i < subCategoryList.length - 1; i++) {
-        let count = 0;
-        while (count < searchKeyword.length - 1) {
-          if (subCategoryList[i] !== searchKeyword[count]) {
-            console.log(subCategoryList[i] + ' , ' + searchKeyword[count]);
-          }
-          count = count + 1;
-        }
-      }
-    }
-  });
 }

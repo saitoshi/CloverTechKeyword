@@ -2,7 +2,9 @@ const puppeteer = require('puppeteer');
 const keyword = 'boats';
 const fs = require('fs');
 const parse = require('csv-parse/sync');
+const { customsearch } = require('googleapis/build/src/apis/customsearch');
 
+const key = 'kf13_kvFe2pzjKJmk32qFQ';
 function csvToArray(src) {
   let data = fs.readFileSync(src);
   let dataList = parse.parse(data, {
@@ -32,6 +34,7 @@ async function keywordSearch() {
   let nounItems = csvToArray('sampleFile/noun.csv');
   // loop through each proeuct in the category, subcategory list
   categoryItems.forEach(async (category) => {
+    let searchQuery = [];
     // for each product in the category&subcategory list
     // get the current product_id
     let currentProduct = category['product_id'];
@@ -51,29 +54,24 @@ async function keywordSearch() {
     for (let i = 0; i < categoryList.length - 1; i++) {
       let count = 0;
       while (count < currentKeyList.length - 1) {
-        console.log(categoryList[i] + ',' + currentKeyList[count]);
-        let searchQuery = categoryList[i] + ',' + currentKeyList[count];
-        // open browser
+        searchQuery.push(categoryList[i] + ',' + currentKeyList[count]);
         count = count + 1;
       }
     }
-
+    console.log(searchQuery);
     let subcategoryGroup = categoryItems.find(
       (x) => x.product_id === currentProduct,
     ).subCategory;
 
-    if (subcategoryGroup.length !== 0) {
-      let subCategoryList = subcategoryGroup.split(' ');
-      for (let i = 0; i < subCategoryList.length - 1; i++) {
-        let count = 0;
-        while (count < searchKeyword.length - 1) {
-          if (subCategoryList[i] !== searchKeyword[count]) {
-            console.log(subCategoryList[i] + ' , ' + searchKeyword[count]);
-          }
-          count = count + 1;
-        }
+    let subCategoryList = subcategoryGroup.split(' ');
+    for (let i = 0; i < subCategoryList.length - 1; i++) {
+      let count = 0;
+      while (count < searchKeyword.length - 1) {
+        searchQuery.push(subCategoryList[i] + ',' + currentKeyList[count]);
+        count = count + 1;
       }
     }
+    console.log(searchQuery);
   });
 }
 async function asyncCall() {
@@ -113,5 +111,28 @@ async function asyncCall() {
   await browser.close();
 }
 
+async function sampleSearch() {
+  const CX = 'c77d6fab0571b442d'; // search engine ID
+  const API_KEY = 'AIzaSyAU8Bx0RdbUGp2QFjOnqUWRooJWnQo2xuU';
+  const SEARCH = 'HELLO WORLD';
+  const { google } = require('googleapis');
+  const apis = google.getSupportedAPIs();
+
+  var customSearch = google.customsearch('v1');
+  //console.log(customSearch);
+
+  console.log(
+    customSearch.cse.list(
+      { cx: CX, q: 'hello', auth: API_KEY },
+      function (err, resp) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+      },
+    ),
+  );
+}
 keywordSearch();
 //keywordSerch();
+//sampleSearch();

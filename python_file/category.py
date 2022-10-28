@@ -12,16 +12,10 @@ df_category = pd.read_csv("category.csv")['カテゴリ名']
 
 df_subCategory= pd.read_csv("category.csv")['サブカテゴリ']
 
+df_keywordNoun = pd.read_csv("noun.csv")['keyword_noun']
 
-categoryList = df_category.to_list();
-subCategoryList = df_subCategory.to_list();
-print(categoryList);
-
-r = requests.get('https://aramakijake.jp/') 
-
-driver = webdriver.Chrome(ChromeDriverManager().install())
-#driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
-# print content of request
-print(r.url)
-   
-print(r.status_code)
+#categoryList = df_category.to_list();
+#subCategoryList = df_subCategory.to_list();
+#keywordList = df_keywordNoun.to_list();
+#print(categoryList);
+print(df_keywordNoun[0].split());

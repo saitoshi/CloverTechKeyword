@@ -12,6 +12,8 @@
   "dependencies": {
     "csv-parse": "^5.3.1",
     "google-ads-api": "^11.1.0",
+    "google-search-results-nodejs": "^2.1.0",
+    "googleapis": "^108.0.0",
     "puppeteer": "^19.0.0"
   }
 }
